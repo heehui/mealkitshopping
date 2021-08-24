@@ -62,11 +62,15 @@
 		location.href = "totalPrice.do?all_total=" + aa;
     }	
 	
-	function deleteRow(ths){ //각 제품의 삭제버튼 누르면 행만 삭제됨//데이터까지는 삭제 x
-	    var ths = $(ths);
-	    ths.parents("tr").remove();
+	function deleteRow(ths,idx){ //각 제품의 삭제버튼 누르면 행만 삭제됨//데이터까지는 삭제 x
+	   /*  var ths = $(ths);
+	    ths.parents("tr").remove(); */
 	    
-	  /*   var total_sum =document.getElementId("total_sum"); */
+	    var id1 = parseInt(idx);
+	    var resultElement1 = document.getElementById('p_name_'+id1);
+	    var p_name = resultElement1.innerText;
+	    
+	    location.href = "oneDelete.do?p_name=" + p_name;
 	 /*    location.href="oneDelete.do?cart_id=" + cart_id; */
 	    
 	}
@@ -79,6 +83,21 @@
 		location.href = "cartClear.do";
 	}
 	 
+	function oneUpdate(idx){
+		
+		var id1 = parseInt(idx);
+		
+		var resultElement1 = document.getElementById('p_name_'+id1);
+		var resultElement2 = document.getElementById('result_'+id1);
+		var resultElement3 = document.getElementById('price_'+id1);
+		
+		var p_name = resultElement1.innerText;
+		var cnt = resultElement2.innerText;
+		var price = resultElement3.innerText;
+		
+		
+		location.href = "oneUpdate.do?p_name=" + p_name + "&cnt=" +cnt + "&price=" + price;
+	}
   </script>	
   
   
@@ -109,7 +128,41 @@
   
   <!-- 서브타이틀 끝 -->
   
-  
+ 
+ <script>
+
+		 	function count(type, idx)  {
+					  // 결과를 표시할 element
+					 /*  var resultElement1 = document.getElementById('result'); */
+					 var id1 = parseInt(idx);
+					 /* alert(id1); */
+					 
+					 var resultElement1 = document.getElementById('result_'+id1);
+					 var resultElement2=  document.getElementById('price_'+id1);
+					 var resultElement3 = document.getElementById('totalPrice_'+id1);
+					 
+					  // 현재 화면에 표시된 값
+					  var number1 = resultElement1.innerText;
+					  var number2 = resultElement2.innerText;
+					  var number3 = resultElement3.innerText;
+					  
+					  // 더하기/빼기
+					  if(type === 'plus') {
+					    number1 = parseInt(number1) + 1;
+					    number3 = parseInt(number3) + parseInt(number2);
+					  }else if(type === 'minus')  {
+					    number1 = parseInt(number1) - 1;
+					    number3 = parseInt(number3) - parseInt(number2);
+					  }
+					  
+					  // 결과 출력
+					  resultElement1.innerText = number1;
+					  resultElement3.innerText = number3;
+					  
+					  
+					}
+	    </script>
+	    
   
   <!-- 장바구니 -->
   <div id="container">
@@ -134,25 +187,35 @@
 		<tr><td colspan="7" align="center">장바구니가 비어있습니다</td></tr>
 </c:when>
 <c:otherwise>
-	 	<c:forEach var="cart" items="${sessionScope.cartlist}" >
+	 	<c:forEach var="cart" items="${sessionScope.cartlist}"  varStatus="status">
 	 	<tr align="center" id='table'><%-- <td id="count">${status.count}</td> --%>
 	 	<td class="cart_cont"><input type="checkbox" name="select1" checked ></td>
 		<td width="20"><img src=${cart.p_image}  width='90'></td>
-	 	<td width="30" name="p_name" class="cart_cont">${cart.p_name}</td>
+	 	<td width="30" name="p_name" class="cart_cont"><span id="p_name_${status.index}">${cart.p_name}</span></td>
 	
 	    <%-- <td width="20" name="price"><fmt:formatNumber value="${cart.price}" pattern="#,###"/> </td> --%>
-	    <td width="20" name="price" class="cart_cont"><input name="price" value="${cart.price}"></td>
-	 	<td width=10% class="cart_cont"><input type="number" name="cnt" id="amount" min="1" max="20" value="${cart.cnt}" width="5" onclick="add(this)"> </td>
+	    <td width="20" name="price" class="cart_cont"><span id="price_${status.index}">${cart.price}</span></td>
+	    
+	   
+
+				
+	    
+	    
+	 	<td width=10% class="cart_cont">
+	 		<input type='button' id='${status.index}' onclick='count("minus",this.id)' value='-'/>
+               <span id='result_${status.index}' class="quantity">${cart.cnt}</span>
+            <input type='button' id='${status.index}' onclick='count("plus",this.id)' value='+'/>
+        </td>
 	 	
 	 	<c:set var="one_total" value="${cart.price * cart.cnt}"/>
 	 	<td width=20% name="one_total" class="cart_cont"><%-- <fmt:formatNumber value="${one_total}" pattern="#,###"/></td> --%>
-	 	<input name="price" value="${one_total}"></td>
+	 	<span id="totalPrice_${status.index}">${one_total}</span></td>
 	 	
    	<%-- 	<input type="hidden" value="<%= cv.getUser_id() %>">
 				<input type="hidden" value="number"> --%>
 		
-		<td width="10" class="cart_cont"><input type="button" value="수정" onclick="oneUpdate()" ></td>
-		<td width="10" class="cart_cont"><input type="button" value="삭제" onclick= "deleteRow(this);"></td>
+		<td width="10" class="cart_cont"><input type="button" value="수정"  id='${status.index}' onclick="oneUpdate(this.id)" ></td>
+		<td width="10" class="cart_cont"><input type="button" value="삭제" id='${status.index}' onclick= "deleteRow(this,this.id);"></td>
 		</tr>
 		</c:forEach>
 </c:otherwise>
@@ -167,50 +230,13 @@
 	<table class="cart_tb" border="0" align="center">
 	<tr><td align="right" id="title">상품구매금액  <fmt:formatNumber value="${all_total}" pattern="#,###"/> + 무료배송 = 결제 총 금액 : <fmt:formatNumber value="${all_total}" pattern="#,###"/> 원</td><!-- 전체 상품 가격 나오게 --></tr>
 	<tr><td align="right"><input type="button" class="btn_chk_del" style="height:35px; width:145px; font-size:14px;" value="선택상품삭제" >
-	
-	<input type="button" style="height:35px; width:145px; font-size:14px;" value="장바구니 비우기" class="btn_cart_del" onclick="delAllitem()"></td></tr>
-	<%-- <tr><td align="left"><input type="button" value="홈으로 가기" onclick="goHome()"></td></tr> --%>
-	<%-- <tr><td align="center"><input type="button" value="선택한 상품 주문" onclick="pay(${all_total});"></td></tr> --%>
-</table>	
-	<form name="p1" action="pay.jsp" method="post">
-	<table class="cart_tb" border="0" align="center">
-	<!-- 값 가져오기 -->
-	
-	
-	<tr><td align="center" id="title"><h1>주문 / 결제</h1></td></tr>
-	
-	<tr><td><div id="container" class="deliInfoArea">
-      <div class="deli_info" align="center">
-        
-        <h5 class="deli_title">배송 정보 입력</h5>
-        <span style="font-size:14px; padding-right:50px;">이름</span><input type="text" name="name" class="deli_name" id="id_name" required/><br>
-        <span style="font-size:14px; padding-right:36px;">이메일</span><input type="email" name="email" class="deli_email" id="id_email" placeholder="example@matkit.com" required/><br>
-        <span style="font-size:14px; padding-right:24px;">전화번호</span><input type="text" name="phone" class="deli_phone" id="id_phone" placeholder="'-' 제외한 숫자만 입력" required/><br>
-        <span style="font-size:14px; padding-right:24px;">배송주소</span><input type="text" name="address" class="deli_address" id="id_address" required/><br>
-        <span style="font-size:14px; padding-right:24px;">요청사항</span><input type="text" name="req" class="deli_req" id="id_req" placeholder="ex) 배송 전 연락부탁드립니다."><br><br>
-       
-		<p>
-		<span style="font-size:22px; font-weight:800;">총 주문금액 : ${all_total} 원</span><input type="hidden" value="${all_total}" name="totalPrice"><%-- <input type="hidden" value="${param.p_name}" name="p_name"> --%>
-		</p><br>
-		
-		<input type="submit" style="height:35px; width:145px; font-size:14px;" class="btn_order" value="결제하기"> 
-		<input type="reset" style="height:35px; width:145px; font-size:14px;" class="btn_cncl" value="취소하기"> 
-		<input type="button" style="height:35px; width:145px; font-size:14px;" class="btn_gohome" value="홈으로 가기" onclick="goHome()">
-		</div></div></td></tr>
-	
-	</table>
-	</form>
-      
-      
-      
-    </div>
-                
+		<input type="button" style="height:35px; width:145px; font-size:14px;" value="장바구니 비우기" class="btn_cart_del" onclick="delAllitem()"></td></tr>
+	<tr><td align="center"><input type="button" style="height:35px; width:145px; font-size:14px;" value="결제창이동" class="btn_cart_del" onclick="location.href='payView.jsp'"></td></tr>
+	</table>	
+    </div>            
   </div> <!-- container 끝 --><!-- 공지사항 end -->
   
   
-  
-  
-
  <!--AWARDS-->
   <section class="awards">
     <div class="inner">

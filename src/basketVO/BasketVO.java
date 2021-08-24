@@ -1,6 +1,8 @@
 package basketVO;
 
-public class BasketVO {
+import java.io.Serializable;
+
+public class BasketVO implements Serializable{
 	private int cart_id;
 	private String user_id;
 	private String p_image;//제품 이미지

@@ -159,7 +159,7 @@
 					var price = document.getElementById('howmuch').innerText.split("원",1);
 					var cnt = document.getElementById('result').innerText;
 					
-					location.href="../cartProcess.jsp?p_image=" + p_image + "&p_name=" + p_name + "&price=" + price + "&cnt=" + cnt;
+					location.href="../cartProcess.jsp?p_image=" + p_image + "&p_name=" + p_name + "&price=" + price + "&cnt=" + cnt ;
 					
 					})	
 			}

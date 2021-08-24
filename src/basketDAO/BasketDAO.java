@@ -124,15 +124,16 @@ public class BasketDAO {
 
 
 	//로그인한 user_id로 주문한 제품의 수량, 한개의 품목에 대한 합계 수정.
-	public boolean update_cart(int cnt, int one_total, String user_id, int price ) throws SQLException {
+	public boolean update_cart(int cnt, int price, int one_total,String user_id, String  p_name) throws SQLException {
 
-		String sql ="update ShopCart1 set cnt =?, one_total = ? where user_id = ? and price= ?";
+		String sql ="update ShopCart1 set cnt =?, price = ?,one_total = ? where user_id = ? and p_name= ?";
 
 		pstmt = con.prepareStatement(sql);
 		pstmt.setInt(1, cnt);
-		pstmt.setInt(2, one_total);
-		pstmt.setString(3, user_id);
-		pstmt.setInt(4, price);
+		pstmt.setInt(2, price);
+		pstmt.setInt(3, one_total);
+		pstmt.setString(4, user_id);
+		pstmt.setString(5, p_name);
 		pstmt.executeUpdate();
 
 		return true;
@@ -154,11 +155,11 @@ public class BasketDAO {
 	}//delete-end
 
 						//cart_id로 장바구니 개별 삭제.
-	public boolean one_delete_cart(int cart_id){
-		String sql = "delete from ShopCart1 where cart_id =?";
+	public boolean one_delete_cart(String p_name){
+		String sql = "delete from ShopCart1 where p_name =?";
 		try {
 			pstmt = con.prepareStatement(sql);
-			pstmt.setInt(1, cart_id);
+			pstmt.setString(1, p_name);
 			pstmt.executeUpdate();/////////////
 
 		}catch(SQLException e) {

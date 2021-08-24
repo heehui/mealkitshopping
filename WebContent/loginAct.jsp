@@ -1,51 +1,56 @@
-<%@ page language="java" contentType="text/html; charset=EUC-KR"
-	pageEncoding="EUC-KR"%>
-<%
-	request.setCharacterEncoding("EUC-KR");
-%>
-
-<jsp:useBean id="check" class="home.login.LoginCheck" />
-<jsp:setProperty property="*" name="check" />
-
-
+<%@page import="home.member.MemberDTO"%>
+<%@page import="home.member.MemberDAO"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="EUC-KR">
-<%
-	if (check.getId() == null || check.getId().trim().equals("")) {
-		response.sendRedirect("login.jsp");
-		return;
-	}
-	String msg = null;
-	String url = "login.jsp";
-
-	int res = check.loginCheck();
-
-	if (res == check.OK) {
-		
-		session.setAttribute("id",check.getId());
-		
-		msg = check.getId() + "´Ô ·Î±×ÀÎ µÇ¾ú½À´Ï´Ù.";
-		url = request.getContextPath() + "/index.jsp";
-	} else if (res == check.NOT_ID) {
-		msg = "¾ø´Â ¾ÆÀÌµğÀÔ´Ï´Ù. È®ÀÎ ÈÄ ·Î±×ÀÎ ÇØÁÖ¼¼¿ä.";
-	} else if (res == check.NOT_PW) {
-		msg = "ºñ¹Ğ¹øÈ£°¡ Æ²·È½À´Ï´Ù. È®ÀÎ ÈÄ ·Î±×ÀÎ ÇØÁÖ¼¼¿ä.";
-	} else if (res == check.ERROR) {
-		msg = "¼­¹ö¿À·ù ¹ß»ıÀÔ´Ï´Ù. °ü¸®ÀÚ¿¡°Ô ¹®ÀÇÇÏ¼¼¿ä.";
-	}
-%>
-<script type="text/javascript">
-    alert("<%=msg%>")
-    location.href= "<%=url%>"
-    
-    
-</script>
-
-<title>Insert title here</title>
+<meta charset="UTF-8">
 </head>
 <body>
+
+	<%
+	request.setCharacterEncoding("UTF-8");
+%>
+
+	<jsp:useBean id="user" class="home.member.MemberDTO" />
+	<jsp:setProperty property="*" name="user" />
+
+	<%
+	MemberDAO dao = new MemberDAO();
+
+	MemberDTO result = dao.selectJsp_memberOne(user);
+	String auto = request.getParameter("auto");
+	
+	if(result != null){
+		//ë¡œê·¸ì¸ ì„±ê³µ
+		
+		session.setAttribute("login", result);
+		
+		Cookie cid = new Cookie("id", result.getId());
+		Cookie cpw = new Cookie("pw", result.getPasswd());
+		
+		cid.setMaxAge(60 * 60);
+		cpw.setMaxAge(60 * 60);
+		
+		if(auto == null){
+			cid.setMaxAge(0);
+			cpw.setMaxAge(0);
+		}
+		
+		response.addCookie(cid);
+		response.addCookie(cpw);
+
+		response.sendRedirect("index.jsp");	
+	}
+	
+	%>
+
+	<script>
+		alert('ì¼ì¹˜í•˜ëŠ” ê³„ì •ì´ ì¡´ì¬í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤');
+		locaiton.href = 'login.jsp';
+	</script>
+
 
 </body>
 </html>

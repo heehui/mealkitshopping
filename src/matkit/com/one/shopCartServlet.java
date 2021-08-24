@@ -57,7 +57,8 @@ public class shopCartServlet extends HttpServlet {
 			int price = Integer.parseInt(request.getParameter("price"));
 			//int price = 5000;
 			int cnt =  Integer.parseInt(request.getParameter("cnt"));
-			String user_id ="user1";
+			//String user_id = request.getParameter("user_id");
+			String user_id = "user1";
 			//int cart_id=1;
 			//int cnt = 1;
 			int one_total = cnt * price;
@@ -172,32 +173,72 @@ public class shopCartServlet extends HttpServlet {
 			
 			
 		case "/oneUpdate.do": //수량 변경시 수량과 가격을 가져와 update 메소드 실행 /////실행x
+			HttpSession session10 = request.getSession(); //session에 저장하기 위해
+			
 			int cnt2 = Integer.parseInt(request.getParameter("cnt"));
 			int price2 = Integer.parseInt(request.getParameter("price"));
-			String user_id3 = "user1";
 			int one_total2 = cnt2 * price2;
+			String p_name1=request.getParameter("p_name");
+			String user_id3 = "user1";
+
+			BasketDAO bdao10 = null;
+			try {
+				bdao10 = new BasketDAO();
+			} catch (ClassNotFoundException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+			} catch (SQLException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+			}
+		
+			try {
+				bdao10.update_cart(cnt2, price2,one_total2, user_id3, p_name1);
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			
+			
+			session10.removeAttribute("cartlist"); 
+			session10.getAttribute("cartlist");
+			
+			str = "cartView.do";
+			
+			break;
+			
+			case "/cart_update.do": 
+		
+				
+			HttpSession session11 = request.getSession(); //session에 저장하기 위해
+			ArrayList<BasketVO> cartlist1 = (ArrayList<BasketVO>)session11.getAttribute("cartlist");
+			session11.setAttribute("cartlist", cartlist1); //세션에 저장
+			
+				str = "cartView.do";
 			break;
 			
 			
 		case "/oneDelete.do": //장바구니 각 제품 행마다 있는 삭제 버튼을 누르면 실행 /////실행x
-			int cart_id=Integer.parseInt("cart_id");
+			String p_name10 = request.getParameter("p_name");
 	
 			HttpSession session3 = request.getSession();
 			
-			BasketDAO bdao3 = null;
+			BasketDAO bdao11 = null;
 			try {
-				bdao2 = new BasketDAO();
+				bdao11 = new BasketDAO();
 			} catch (ClassNotFoundException | SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			//String user_id = request.getParameter("user_id");
-			bdao3.one_delete_cart(cart_id);
-			session3.getAttribute("cartlist");
-			session3.removeAttribute("cartlist");
 			
-			str="cart_in.jsp";
+			bdao11.one_delete_cart(p_name10);
+
+			session3.removeAttribute("cartlist"); 
+			session3.getAttribute("cartlist");
+			
+			str="cartView.do";
+			
 			break;
 			
 		case "/totalPrice.do": //결제하기 버튼 누르면 user_id별 총 결제 금액이 넘어가도록

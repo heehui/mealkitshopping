@@ -1,3 +1,4 @@
+<%@page import="home.member.MemberDTO"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -48,7 +49,10 @@
   
 </head>
 <body>
-  
+  <!-- 세션 -->
+	<%
+		MemberDTO login = (MemberDTO) session.getAttribute("login");
+	%>
   <!-- 헤더 -->
  
   <jsp:include page ="../header2.jsp" flush="true"/>
@@ -160,7 +164,7 @@
 					var price = document.getElementById('howmuch').innerText.split("원",1);
 					var cnt = document.getElementById('result').innerText;
 					
-					location.href="../cartProcess.jsp?p_image=" + p_image + "&p_name=" + p_name + "&price=" + price + "&cnt=" + cnt;
+					location.href="../cartProcess.jsp?p_image=" + p_image + "&p_name=" + p_name + "&price=" + price + "&cnt=" + cnt+ "&user_id=" + <%=login.getName()%>;
 					
 					})	
 			}
