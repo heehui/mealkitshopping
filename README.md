@@ -50,8 +50,10 @@
  #
 
 <p align="center">
-<img src="https://user-images.githubusercontent.com/78891624/129853983-2454ae3d-b5ef-4a8b-b9cc-a586aa10deab.gif" width="850" height="500"/>
+<img src="https://user-images.githubusercontent.com/78891624/133044245-c7577786-397e-49dd-b03e-bab2fcfae727.gif" width="850" height="500"/>
 </p>
+
+
 
 ## 4. 프로젝트 설명
 
@@ -63,11 +65,11 @@
 - Servlet Controller 설정
 
 ### [4.3 장바구니 기능 ](#43-장바구니-기능)
-- 제품 상세페이지 -> 장바구니 이동
-- 장바구니에 담은 제품정보 DB에 저장
-- 장바구니 -> 결제페이지 이동
-
-
+- 제품 상세페이지에서 장바구니 이동
+- 장바구니 DB 저장
+- 장바구니 전체 비우기
+- 장바구니 제품정보 DB에 저장
+- 장바구니에서 결제페이지 이동
 
 
 #
@@ -140,19 +142,19 @@ String str = null;
 switch(c) {
 		case "/cart_in.do": 
 			
-          ... (생략)		
+          ... 		
           
-			break;
+		break;
       
-          ... (생략)		
-          
+          ... 
 			
 		}
 ```
 ###### -  request.getRequestDispatcher();를 이용하여 페이지의 방향을 바꾸면서 인자도 해당 페이지에 함께 가져갈 수 있도록 한다.
 ```
 RequestDispatcher rd1 = request.getRequestDispatcher(str);
-		rd1.forward(request, response); //"cartlist"를 가져가면서 페이지 방향 바꿈
+rd1.forward(request, response); 
+
 	}
 
 }
@@ -169,8 +171,10 @@ RequestDispatcher rd1 = request.getRequestDispatcher(str);
 
 - BasketVO.java
 ###### - SHOPCART1 DB테이블의 칼럼명과 동일하게 cart 번호, USER 아이디, 제품이미지, 제품명, 제품 가격, 제품 수량, 제품 총 가격 변수를 생성한다.
+###### - 각 변수별 getter, setter와 생성자를 생성한다.
 ```
 public class BasketVO implements Serializable{
+
 	private int cart_id;
 	private String user_id;
 	private String p_image;//제품 이미지
@@ -178,238 +182,349 @@ public class BasketVO implements Serializable{
 	private int price;//가격
 	private int cnt;//수량
 	private int one_total;
-	
-  
-  .... 생성자, getter, setter 생성
+  	
+	...
 
 }
 
 ```
 
-#### 4.3.1 - 제품 상세페이지 -> 장바구니 이동
+#### 4.3.1 제품 상세페이지에서 장바구니 이동
+- 각 밀키트 제품 상세페이지에서 <img src="https://user-images.githubusercontent.com/78891624/133028529-f1e79f03-78bc-43c1-924d-9cc2fd39c254.PNG" width="110" height="40"/>를 눌러 장바구니에 담으면 '장바구니에 상품이 정상적으로 담겼습니다'라는 알림 창이 뜬다.
+- 그 후 해당 제품의 제품이미지, 제품명, 제품가격, 수량 값이 cartProcess.jsp를 보내진다.
+- click()에 의해 장바구니 화면으로 바로 이동할 수 있게 한다.
+- 위와 같은 방식으로 원하는 제품을 장바구니에 계속 담을 수 있다.
 
-- 회원의 경우, 메인페이지에서 [개발언어]를 누르면 전체게시판 및 각 개발언어 카테고리별 게시판이 나타난다.
-- 회원은 공지사항을 제외한 모든 게시물을 작성할 권한을 가지고 있다.
-- 게시판 화면에서 오른쪽에 <img src="https://user-images.githubusercontent.com/78891624/130184068-8751dc3e-5d3b-4466-b01a-99f77cea28cc.PNG" width="30" height="30"/> 을 눌러 게시물을 작성할 수 있다.
+![MatKiT2](https://user-images.githubusercontent.com/78891624/133044245-c7577786-397e-49dd-b03e-bab2fcfae727.gif)
+![MatKiT3](https://user-images.githubusercontent.com/78891624/133044325-f876b8e2-7e2c-4353-92c6-fcaf815dee02.gif)
+![MatKiT1_1](https://user-images.githubusercontent.com/78891624/133044375-18c8a5eb-8104-4179-b8e2-4aba1eb53ce3.gif)
 
-
-|게시물 작성 및 등록|
+|장바구니로 이동|
 |:-:|
-|![게시물 작성 및 등록](https://user-images.githubusercontent.com/78891624/129854031-a2dbccee-ff8a-4c0c-b77f-e937ebcac96b.gif?h=750&w=1260)|	
+|![장바구니로 이동](https://user-images.githubusercontent.com/78891624/133044375-18c8a5eb-8104-4179-b8e2-4aba1eb53ce3.gif?h=750&w=1260)|	
 
-#### 1)  write.jsp
-- 게시판 카테고리명, 제목, 이미지, 내용, USER 번호, USER 아이디를 <form>의 post방식으로 BoardController1의 writerAfter 로 보낸다.
-- <form> 태그로 파일이나 이미지를 서버로 전송하기 위해 enctype="multipart/form-data" 를 작성한다.
-- 게시판 카테고리명(lang)을 select(콤보박스)를 이용하여 개발언어 게시판(java, javascript, spring, html) 중  하나를 선택할 수 있게 했다.
-
-```	    
-<form action="writeAfter" method = "post" enctype="multipart/form-data">
-       	<div class="form-group">
-		<select name="lang">
-		 <option value="java">java</option>
-		 <option value="javascript">javascript</option>
-		 <option value="spring">spring</option>
-		 <option value="html">html</option>
-		</select>
-	</div>
-	<div class="form-group">
-		 <label for="usr">제목:</label>
-		 <input type="text" class="form-control" id="title" name = "title">
-	</div>
-	<div class="form-group">
-		<input type="file" class="form-control-file border" id="img" name="file" multiple="multiple"><br>
-	</div>
-	<div class="form-group">
-		<label for="comment">내용:</label>
-		 <textarea class="caption" required="required" name="contents" onkeydown="resize(this)" onkeyup="resize(this)"></textarea>
-	</div>
-		<input type="hidden" name="user_id" value="${principal.user.username}"> //시큐리티 회원 username(=회원 아이디)
-		<input type="hidden" name="user_num" value="${principal.user.id}">  //시큐리티 회원 id(=회원 번호)
-		   <button type="submit" class="btn btn-info">발행</button>
-</form>
-```
-- USER 아이디와 USER 번호는 아래의 코드와 같이 header.jsp 상단에 작성한 시큐리티 태그라이브러리를 이용하여 불러와 hidden으로 값을 Controller로 넘긴다.
+#### 1)  제품상세페이지 (예시: view_bibimbab.jsp)
+- <img src="https://user-images.githubusercontent.com/78891624/133028529-f1e79f03-78bc-43c1-924d-9cc2fd39c254.PNG" width="110" height="40"/>를 누르면 자바스크립의 goCart() 함수를 실행시켜 '장바구니에 상품이 정상적으로 담겼습니다'라는 알림 창이 뜬다.
+- 자바스크립트의 document.getElementById를 이용하여 제품의 제품이미지, 제품명, 제품가격, 수량 값을 cartProcess.jsp로 보낸다.
 
 ```
-<sec:authorize access="isAuthenticated()">
-	<sec:authentication property="principal" var="principal" />
-</sec:authorize> <!-- 시큐리티 태그라이브러리 -->
-```
-
-#### 2) BoardDAO.java
-- 게시물을 등록하는 매퍼 인터페이스를 만들어준다.
-```
-@Mapper 
-public interface BoardDAO { 
-	
-	public boolean addBoard(BoardVO bvo);
-```	
-
-#### 3) BoardService1.java
-- @Autowired annotation을 이용하여 매퍼 인터페이스를 객체 형태로 값을 받는다.
-- Service에서는 MyBatis의 addBoard를 실행시킨다.
-```
-@Service
-public class BoardService1 {
-	
-	@Autowired 
-	private BoardDAO bdao; //DAO객체를 한번에 받아서
-	
-	
-	public boolean addBoard(BoardVO bvo) {
-		return bdao.addBoard(bvo);
-	}
-```
-
-#### 4) mybatismapper.xml
-- num(글번호)는 boardTable2 쿼리문에서 자동 수 증가(AUTO_INCREMENT)를 해줬기 때문에 useGeneratedKeys="true" keyProperty="num" 을 작성해준 후 insert할 칼럼에서 생략한다.
-- Service에 의해 해당 쿼리가 실행된다.
-```
- <insert id="addBoard" useGeneratedKeys="true" keyProperty="num">
-		INSERT INTO 
-	    	boardTable2
-	   			(
-	   				user_id,
-	   				lang,
-					title,
-					contents,
-					image,
-					user_num
-				)
-	    	VALUES
-	   			(
-	   				#{user_id},
-	   				#{lang},
-	   				#{title},
-	   				#{contents},
-	   				#{image},
-	   				#{user_num}
-				)
-    </insert>
-```
-
-#### 5) BoardController1.java
-- 게시판 화면에서 <img src="https://user-images.githubusercontent.com/78891624/130184068-8751dc3e-5d3b-4466-b01a-99f77cea28cc.PNG" width="30" height="30"/>을 클릭하면, 해당Controller의 write로 와서 write.jsp(글쓰기 페이지)로 이동한다.
-- @Controller annotation을 이용하여 Controller임을 나타낸다.
-- @Autowired annotation을 이용하여 Service를 객체 형태로 값을 받는다.
-
-```
-@Controller
-public class BoardController1 {
-	
-	@Autowired
-	private BoardService1 bs;
-	
-	@GetMapping("/write")
-	public String write() {
-		return "write"; 
-	}
-```
-
-- 글쓰기 페이지에서 java, javascript, spring, html 중 원하는 개발언어 게시판 카테고리를 콤보박스로 선택한다.
-- 제목, 이미지 첨부, 내용을 입력한 후 [발행]을 누르면 BoardController1의 writeAfter 로 이동한다.
-- 입력한 값들을 @RequestParam annotation을 통해 파라미터로 가져오고, user_id(USER 아이디)는 session에 저장되도록 한다.
-- 첨부한 이미지는 이미지가 저장될 외부 경로인 path를 지정한 후 이미지파일의 이름이 DB에 저장되도록 한다.
-- 게시물의 내용은 개행도 적용될 수 있도록 replace를 이용하여 enter(즉, \r\n)를 br 태그로 DB에 저장되도록 한다.
-- Service에서 생성한 addBoard를 불러와 각 파라미터값들이 insert 되도록 한다.
-- 게시물을 등록하면 mainBoard.jsp(전체 게시판 화면)으로 이동할 수 있도록 return 해준다.
- 
-```
-@PostMapping("/writeAfter")
-public String writeAction(
-			HttpServletRequest req,
-			HttpSession session,
-			@RequestParam("file") MultipartFile file, //첨부 이미지
-			@RequestParam("lang") String lang, //게시판 카테고리명
-			@RequestParam("title")String title, //글 제목
-			@RequestParam("user_num")int user_num, //USER 번호
-			Model model1) throws IllegalStateException, IOException {
-
-		String contents = req.getParameter("contents"); //게시물 내용
-		contents = contents.replace("\r\n", "<br>"); //db에 저장할 때, 개행부분을 br 태그로 변경해준 후 저장
-
-		String user_id=req.getParameter("user_id"); //USER 아이디
-		session.setAttribute("user_id", user_id);
-	
-		String path = "C:/workspace/springbootwork/upload/"; //이미지가 저장될 외부 경로 지정
-		
-		if (!file.getOriginalFilename().isEmpty()) {
-			file.transferTo(new File(path + file.getOriginalFilename()));
-		}
-		
-		bs.addBoard(new BoardVO(user_id,user_num,0,lang, title, contents, file.getOriginalFilename())); //게시물이 등록됨
-		return "board/mainBoard"; //전체 게시판으로 이동
+<script>
+function goCart(){
+					
+	Swal.fire({	
+		 position: 'center',
+		 icon: 'success',
+		 title: '장바구니에 상품이 \n 정상적으로 담겼습니다',
+		 showConfirmButton: false,
+		 timer: 3000
+		}).then((result) => {
+					
+	var p_image1 = document.getElementById('pho_detail');
+	var p_image = p_image1.getAttribute("src").substring(1); //이미지
+	var p_name=  document.getElementById('item_name').innerText; //제품명	
+	var price = document.getElementById('howmuch').innerText.split("원",1); //가격
+	var cnt = document.getElementById('result').innerText; //수량
+					
+	location.href="../cartProcess.jsp?p_image=" + p_image + "&p_name=" + p_name + "&price=" + price + "&cnt=" + cnt;
+					
+	})	
 }
-```	
-
-#### 4.3.2 게시물 조회
-- 메인페이지에서 [개발언어]를 누르면 전체게시판 및 각 개발언어 게시판이 나타난다.
-- 등록된 게시물은 섬네일 형태로 이미지, 작성일, 조회수가 표시된다.
-- 각 게시물을 클릭하면 그에 맞는 상세페이지(detailView.jsp)로 이동한다.
-- 게시물 작성자의 USER 아이디와 로그인한 USER 아이디가 같다면, 게시물을 [수정] 및 [삭제]할 수 있는 권한이 주어진다.
-- 그렇지않다면, [수정], [삭제] 버튼이 나타나지 않는다.
+</script>
+```
 
 
-|게시물 조회|
-|:-:|
-|![게시물 조회](https://user-images.githubusercontent.com/78891624/129853983-2454ae3d-b5ef-4a8b-b9cc-a586aa10deab.gif?h=850&w=1260)|	
-
-#### 4.3.2.1 전체 게시판 조회
-
-#### 1) board/mainBoard.jsp
-- ajax를 통해 BoardController1에 boardList 로 요청을 보내면 BoardController1 -> BoardService1 -> mapper 인터페이스 -> mapper.xml에서 쿼리를 실행해 
-  이 값을 현재 mainBoard.jsp의 result에 데이터 값을 가지고 오게 된다.
-- forEach문과 grid CSS를 적용하여 html을 생성해 <tbody> 부분에 섬네일 형식으로 append 시켜준다. (섬네일에 나타나는 것: 이미지, 작성일, 조회수) 
-- 각 섬네일을 클릭하면, 그에 맞는 게시물 정보를 BoardController1의 detailView 로 보내 상세페이지인 detailView.jsp가 실행되도록 한다.
+#### 2) cartProcess.jsp
+- click()에 의해 id가 send인 버튼을 자동으로 클릭되도록 한다.
 ```
 <script>
 
 $(document).ready(function() {
-    $.ajax({
-    	
-    	url: "boardList", 
-    	success: function(result){  // result    
-        var html = "<div id='grid' >";
-       
-       result.forEach(function(item){
-    
-    	   html+= "<div class='image1'><a href = 'detailView?contents=" + item.contents + 
-        				'&image=' + item.image + 
-        				'&title=' + item.title +
-        				'&user_id=${principal.user.username}' +
-        				'&writer=' + item.user_id +
-        				'&user_num=' + item.user_num +
-        				'&num=' + item.num +
-        				'&reply_cnt=' + item.reply_cnt +
-        				'&hit=' + item.hit +
-        				'&date1=' + item.date1 +
-        				'&lang=' + item.lang + "'>" + "<img id='hov1' src='/upload/" + item.image + "' width='200'  height='200'></a>
-						<h6 id='date1'>작성일: " + item.date1 + '<br><img src="../images/click.png">' + item.hit + "</h6></div>";
-    	  								 						/* ' 댓글수:' + item.reply_cnt */
-       })    
-       $("#listArea").append(html);
-     }});
-} ); 
-
+	document.getElementById('send').click();
+});
+	
 </script>
-</head>
-<body>		
-	<tbody id="listArea" style="width: 50%">
-	</tbody>
+```
+-  제품 상세페이지에서 넘어온 값들을 파라미터로 받은 후 cart_in.do(Controller)로 이동되도록 한다.
+```
+<div id="container">                    
+    <div class="cart_wrap">
+    <table class="cart_tb" border="0" align="center" style="margin-top:50px;"> 
+	<tr><h1>loading...</h1></tr>
+	<tr>
+	<form action="cart_in.do" method="get">
+		<input type="hidden" name="p_image" value="'${param.p_image}'">
+		<input type="hidden" name="p_name" value="'${param.p_name}'">
+		<input type="hidden" name="price" value="${param.price}">
+		<input type="hidden" name="cnt" value="${param.cnt}">
+		<input type="hidden" name="user_id" value="${param.user_id}">
+		<input type="submit"  id="send" value="" style="background-color:transparent;  border:0px transparent solid;"> 
+	</form>
+	</tr>
+    </table>
+    </div>    
+  </div> 
+
 ```
 
-#### 2) BoardDAO.java
-- 게시물 전체 조회에 대한 mapper 메소드를 생성한다.
-```
-public List<BoardVO> getAllBoard();
-```
+#### 3) cart_in.jsp
+- 장바구니 화면
+- @Controller annotation을 이용하여 Controller임을 나타낸다.
+- @Autowired annotation을 이용하여 Service를 객체 형태로 값을 받는다.
 
-#### 3) BoardService1.java
-- Service에서는 MyBatis의 getAllBoard로 실행시킨 데이터를 List에 담아서 BoardController1로 보낸다.
-```	
-public List<BoardVO> getAllBoard(){
-	return bdao.getAllBoard();
+```
+ <div id="container">                    
+    <div class="cart_wrap">
+    <table class="cart_tb" border="0" align="center" style="margin-top:50px;"> 
+     <tr><td id="title" colspan="8" align="left">구매상품</td>
+     <tr><td colspan="8" align="left"><input type="checkbox" name="goods" style="font-weight:700;" checked>일반상품(${fn:length(cartlist)})</td> 
+     <tr align="center" id="title" class="menu"><td width=5%></td>
+	<td width=20% >이미지</td>
+	<td width=30%>상품명</td>
+	<td width=20%>가격</td>
+	<td width=10%>수량</td>
+	<td width=20%>합계</td>
+	<td width=30% colspan="2">선택</td>	
+	<c:choose>
+	<c:when test="${cartlist == null}">
+		<tr><td colspan="7" align="center">장바구니가 비어있습니다</td></tr>
+	</c:when>
+	<c:otherwise>
+	 	<c:forEach var="cart" items="${sessionScope.cartlist}"  varStatus="status">
+	 	  <tr align="center" id='table'><%-- <td id="count">${status.count}</td> --%>
+	 	   <td class="cart_cont"><input type="checkbox" name="select1" checked ></td>
+		   <td width="20"><img src=${cart.p_image}  width='90'></td>
+	 	   <td width="30" name="p_name" class="cart_cont"><span id="p_name_${status.index}">${cart.p_name}</span></td>
+	           <td width="20" name="price" class="cart_cont"><span id="price_${status.index}">${cart.price}</span></td>
+	    
+	 	<td width=10% class="cart_cont">
+	 	 <input type='button' id='${status.index}' onclick='count("minus",this.id)' value='-'/>
+               	 <span id='result_${status.index}' class="quantity">${cart.cnt}</span>
+            	 <input type='button' id='${status.index}' onclick='count("plus",this.id)' value='+'/></td>
+	 	
+  	 	 <c:set var="one_total" value="${cart.price * cart.cnt}"/>
+	 	  <td width=20% name="one_total" class="cart_cont">
+	 	  <span id="totalPrice_${status.index}">${one_total}</span></td>
+		
+		  <td width="10" class="cart_cont"><input type="button" value="수정"  id='${status.index}' onclick="oneUpdate(this.id)" ></td>
+		  <td width="10" class="cart_cont"><input type="button" value="삭제" id='${status.index}' onclick= "deleteRow(this,this.id);"></td>
+		  </tr>
+	       </c:forEach>
+	</c:otherwise>
+        </c:choose>	
+     </table>	
+
+		<c:set var="all_total" value="0"/>
+    		<c:forEach var="result" items="${sessionScope.cartlist}">   
+    		 <c:set var="all_total" value="${all_total + (result.price * result.cnt)}"/> 
+ 		</c:forEach> 
+
+	<table class="cart_tb" border="0" align="center">
+	<tr><td align="right" id="title">상품구매금액  <fmt:formatNumber value="${all_total}" pattern="#,###"/> + 무료배송 = 결제 총 금액 : <fmt:formatNumber value="${all_total}" pattern="#,###"/> 원</td><!-- 전체 상품 가격 나오게 --></tr>
+	<tr><td align="right"><input type="button" class="btn_chk_del" style="height:35px; width:145px; font-size:14px;" value="선택상품삭제" >
+		<input type="button" style="height:35px; width:145px; font-size:14px;" value="장바구니 비우기" class="btn_cart_del" onclick="delAllitem()"></td></tr>
+	<tr><td align="center"><input type="button" style="height:35px; width:145px; font-size:14px;" value="결제창이동" class="btn_cart_del" onclick="location.href='payView.jsp'"></td></tr>
+	</table>	
+    </div>            
+  </div> <!-- container 끝 --><!-- 공지사항 end -->
+ 
+```
+#### 4.3.2 장바구니 DB 저장
+#### 1) shopCartServlet.java
+
+- 제품 상세페이지에서 <img src="https://user-images.githubusercontent.com/78891624/133028529-f1e79f03-78bc-43c1-924d-9cc2fd39c254.PNG" width="110" height="40"/>를 누르면 cartProcess.jsp를 거쳐 cart_.do(Controller)로 이동하게 된다.
+- switch문의 case "/cart_in.do": 가 실행된다.
+- cartProcess.jsp에서 넘어온 제품정보 파라미터값을 받아와 BasketVO 객체에 담아준다.
+- 이 때 USER 아이디는 user1이라는 임시값을 주었고, 총 가격(on_total)은 수량 * 가격 값을 넣어준다.
+- BasketVO 객체에 담은 값들을 session에 담아 페이지가 이동해도 그대로 장바구니에 제품정보가 나타나도록 해준다.
+- 새로운 제품을 장바구니에 담을 때마다 새로운 BasketVO 객체를 생성하여 ArrayList 컬렉션에 담도록 한다.
+- cartlist라는 속성명의 session에 저장한다.
+```
+	String c = request.getRequestURI().substring(request.getContextPath().length());
+		
+	String str = null; 
+	switch(c) {
+	case "/cart_in.do": 
+			
+		String p_image = request.getParameter("p_image");//장바구니 담기 누른 제품들 parameter로 가져옴
+		String p_name = request.getParameter("p_name");
+		int price = Integer.parseInt(request.getParameter("price"));
+		int cnt =  Integer.parseInt(request.getParameter("cnt"));
+		String user_id = "user1";
+		int one_total = cnt * price;
+			
+		BasketVO bvo = new BasketVO();
+		bvo.setUser_id(user_id);
+		bvo.setP_image(p_image);
+		bvo.setP_name(p_name);
+		bvo.setPrice(price);
+		bvo.setCnt(cnt); 
+			
+		HttpSession session1 = request.getSession(); //session에 저장하기 위해
+		ArrayList<BasketVO> cartlist = (ArrayList<BasketVO>)session1.getAttribute("cartlist");
+```			
+- 장바구니에 제품을 담을 때 아무것도 없는 상태에서 처음 담았을 경우, new ArrayList<BasketVO>();로 컬렉션 객체를 생성하고
+- BasketDAO의 insert_cart를 실행시켜 데이터베이스에 제품정보가 저장되도록 한다.
+```
+BasketDAO bdao = null;
+			
+	try {
+		bdao = new BasketDAO();
+	} catch (ClassNotFoundException | SQLException e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+	}
+		if(cartlist == null){
+			cartlist = new ArrayList<BasketVO>();
+			cartlist.add(bvo);
+			try {
+				dao.insert_cart(user_id,p_image, p_name, price,cnt,one_total);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+		}
+```
+- ArrayList<BasketVO>값 cartlist가 null이 아닐 때, 이미 장바구니에 담긴 제품명이 있을 때
+- ArrayList<BasketVO>값의 제품명(getP_name())을 현재 담은 제품명과 비교하여 같은 경우(이미 담긴 경우), cart_in.jsp에서 테이블 행수를 늘리는 것이 아니라 해당 제품명의 수량만 v.setCnt(v.getCnt()+cnt)로 늘려준다.
+```
+}else{
+	boolean find = false;
+	for(BasketVO v : cartlist) {
+	if(v.getP_name().equals(p_name)) { //이전에 넣었던 제품과 동일한 이름의 제품을 담았다면,
+		v.setCnt(v.getCnt()+cnt); // 수량만 늘려주기.
+	try {
+		bdao.cntUpdate_cart(v.getCnt(),v.getCnt()*v.getPrice(),p_name);
+	} catch (SQLException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	find = true;
+		}
 }
 ```
+- 이전에 없던 제품이라면 해당 BasketVO  객체 값을 cartlist에 add해준다.
+- 그리고 이 컬렉션 객체를 cartlist라는 속성명으로 session에 저장한다.
+- 곧바로 cartView.do(Controller)로 이동하여 새로 바뀐 변수값들을 보낸다.
+				
+```			
+if(find == false) {
+	cartlist.add(bvo); //이전에 없던 제품이라면 cartlist에 넣어주기
+	try {
+		bdao.insert_cart(user_id,p_image, p_name, price,cnt,one_total);
+	} catch (SQLException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+		}
+				
+	}
+	session1.setAttribute("cartlist", cartlist); //세션에 저장
+			
+	str = "cartView.do?p_image=" + p_image + "&p_name=" + p_name + "&price=" + price + "&cnt=" + cnt + "&one_total=" + one_total;
+	break;
+```
+#### 4.3.3 장바구니 전체 비우기
+#### 1) cart_in.jsp
+- 장바구니 화면에서 [장바구니 비우기]를 누르면 delAllitem()가 실행된다.
+```
+function delAllitem(){ //장바구니 모두 비우기 
+	location.href = "cartClear.do";
+}
+``` 
+#### 2) shopCartServlet.java
+- cartClear.do(Controller)로 이동하여 DB에서도 모든 장바구니 정보를 삭제하고 cartlist라는 session값이 제거된다.
+```
+case "/cartClear.do": //장바구니 모두 비우기
+	String user_id2 = "user1";
+	HttpSession session2 = request.getSession();
+			
+	BasketDAO bdao2 = null;
+	try {
+		bdao2 = new BasketDAO();
+	} catch (ClassNotFoundException | SQLException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+		bdao2.deleteAll_cart(user_id2);
 
+		session2.getAttribute("cartlist");
+		session2.removeAttribute("cartlist"); 
+			
+		str="cart_in.jsp";
+	break;
+```
+#### 3) BasketDAO.java
+- 장바구니 정보를 전체 삭제하는 메서드 deleteAll_cart()를 생성한다.
+```
+public boolean deleteAll_cart(String user_id){
+   String sql = "delete from ShopCart1 where user_id =?";
+	try {
+		pstmt = con.prepareStatement(sql);
+		pstmt.setString(1, user_id);
+		pstmt.executeUpdate();
 
+	}catch(SQLException e) {
+		System.out.println("delete Exception");
+		e.printStackTrace();
+		return false;
+	}
+	return true;	
+}
+```
+#### 4.3.4 장바구니에서 결제페이지 이동
+- 장바구니의 [결제창이동]을 눌러 결제페이지로 이동하게 된다.
+- 
+#### 1)payView.jsp
+```
+<div id="container" >                  
+    <div class="cart_wrap">
+    <table class="cart_tb" border="0" align="left" style="margin-top:10px;  width: 45%;"> 
+	<tr><td id="title" colspan="7" align="left">결제상품</td>
+	<tr align="center" id="title" class="menu">
+	  <td width=20% >이미지</td>
+	  <td width=30%>상품명</td>
+	  <td width=20%>가격</td>
+	  <td width=10%>수량</td>
+	  <td width=20%>합계</td>
+		
+	 <c:forEach var="cart" items="${sessionScope.cartlist}" >
+	 	<tr align="center" id='table'>
+		 <td width="20"><img src=${cart.p_image}  width='70'></td>
+	 	 <td width="30" name="p_name" class="cart_cont">${cart.p_name}</td>
+	         <td width="20" name="price" class="cart_cont">${cart.price}</td>
+	 	 <td width="10" class="cart_cont">${cart.cnt}</td>
+	           <c:set var="one_total" value="${cart.price * cart.cnt}"/>
+	 	<td width="20" name="one_total" class="cart_cont">${one_total}</td>
+	           <c:set var="all_total" value="0"/>
+         <c:forEach var="result" items="${sessionScope.cartlist}">   
+    	   <c:set var="all_total" value="${all_total + (result.price * result.cnt)}"/> 
+ 	 </c:forEach> 
+	</c:forEach>
+	  <tr><td align="right" id="title" colspan="7">
+	  상품구매금액<fmt:formatNumber value="${all_total}" pattern="#,###"/> + 무료배송 = 결제 총 금액 : <fmt:formatNumber value="${all_total}" pattern="#,###"/> 원</td></tr>
+	</table>
+  		
+	<form name="p1" action="pay.jsp" method="post">
+ 		<table class="cart_tb" border="0" align="right" style="margin-top:10px; width: 50%;"><!-- 값 가져오기 -->
+		<tr><td><div id="container" class="deliInfoArea">
+      	<div class="deli_info" align="center">
+        <h5 class="deli_title">배송 정보 입력</h5>
+        <span style="font-size:20px; padding-right:50px;">이름</span><input type="text" name="name" class="deli_name" id="id_name" style="width: 300px; height: 20px;" required/>		<br>
+        <span style="font-size:20px; padding-right:32px;">이메일</span><input type="email" name="email" class="deli_email" id="id_email" placeholder="example@matkit.com" style="width: 300px; height: 20px;" required/><br>
+        <span style="font-size:20px; padding-right:17px;">전화번호</span><input type="text" name="phone" class="deli_phone" id="id_phone" placeholder="'-' 제외한 숫자만 입력" style="width: 300px; height: 20px;"required/><br>
+        <span style="font-size:20px; padding-right:17px;">배송주소</span><input type="text" name="address" class="deli_address" id="id_address" style="width: 300px; height: 20px;" required/><br>
+        <span style="font-size:20px; padding-right:17px;">요청사항</span><input type="text" name="req" class="deli_req" id="id_req" style="width: 300px; height: 20px;" placeholder="ex) 배송 전 연락부탁드립니다."><br><br>
+       
+		<p>
+		<span style="font-size:22px; font-weight:800;">총 주문금액 : ${all_total} 원</span><input type="hidden" value="${all_total}" name="totalPrice"><%-- <input type="hidden" value="${param.p_name}" name="p_name"> --%>
+		</p><br>
+		
+		<input type="submit" style="height:35px; width:145px; font-size:14px;" class="btn_order" value="결제하기"> 
+		<input type="reset" style="height:35px; width:145px; font-size:14px;" class="btn_cncl" onclick="history.go(-1)" value="취소하기"> 
+		<input type="button" style="height:35px; width:145px; font-size:14px;" class="btn_gohome" value="홈으로 가기" onclick="location.href='index.jsp';">
+		</div></div></td></tr>
+	
+	</table>
+	</form>
+    </div> 
+  </div> <!-- container 끝 --><!-- 공지사항 end -->
+```
