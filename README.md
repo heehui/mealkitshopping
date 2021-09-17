@@ -251,11 +251,11 @@ function goCart(){
 		 timer: 3000
 		}).then((result) => {
 					
-	var p_image1 = document.getElementById('pho_detail');
-	var p_image = p_image1.getAttribute("src").substring(1); //이미지
-	var p_name=  document.getElementById('item_name').innerText; //제품명	
-	var price = document.getElementById('howmuch').innerText.split("원",1); //가격
-	var cnt = document.getElementById('result').innerText; //수량
+	let p_image1 = document.getElementById('pho_detail');
+	let p_image = p_image1.getAttribute("src").substring(1); //이미지
+	let p_name=  document.getElementById('item_name').innerText; //제품명	
+	let price = document.getElementById('howmuch').innerText.split("원",1); //가격
+	let cnt = document.getElementById('result').innerText; //수량
 					
 	location.href="../cartProcess.jsp?p_image=" + p_image + "&p_name=" + p_name + "&price=" + price + "&cnt=" + cnt;
 					
@@ -375,16 +375,16 @@ case "/cartView.do":
 <script>
 	function count(type, idx)  {
 			
-		 var id1 = parseInt(idx);
+		 let id1 = parseInt(idx);
 			
-		 var resultElement1 = document.getElementById('result_'+id1);
-		 var resultElement2=  document.getElementById('price_'+id1);
-		 var resultElement3 = document.getElementById('totalPrice_'+id1);
+		 let resultElement1 = document.getElementById('result_'+id1);
+		 let resultElement2=  document.getElementById('price_'+id1);
+		 let resultElement3 = document.getElementById('totalPrice_'+id1);
 					 
 		// 현재 화면에 표시된 값
-		var number1 = resultElement1.innerText;
-		var number2 = resultElement2.innerText;
-		var number3 = resultElement3.innerText;
+		let number1 = resultElement1.innerText;
+		let number2 = resultElement2.innerText;
+		let number3 = resultElement3.innerText;
 					  
 					 
 		if(type === 'plus') {
@@ -570,18 +570,18 @@ public boolean deleteAll_cart(String user_id){
 - [홈으로 가기]를 누르면 웹사이트의 메인페이지로 이동하게 된다.
 ```
 <form name="p1" action="pay.jsp" method="post">
- 		<table class="cart_tb" border="0" align="right" style="margin-top:10px; width: 50%;"><!-- 값 가져오기 -->
-		<tr><td><div id="container" class="deliInfoArea">
-      	<div class="deli_info" align="center">
-        <h5 class="deli_title">배송 정보 입력</h5>
-        <span style="font-size:20px; padding-right:50px;">이름</span><input type="text" name="name" class="deli_name" id="id_name" style="width: 300px; height: 20px;" required/>		<br>
-        <span style="font-size:20px; padding-right:32px;">이메일</span><input type="email" name="email" class="deli_email" id="id_email" placeholder="example@matkit.com" style="width: 300px; height: 20px;" required/><br>
-        <span style="font-size:20px; padding-right:17px;">전화번호</span><input type="text" name="phone" class="deli_phone" id="id_phone" placeholder="'-' 제외한 숫자만 입력" style="width: 300px; height: 20px;"required/><br>
-        <span style="font-size:20px; padding-right:17px;">배송주소</span><input type="text" name="address" class="deli_address" id="id_address" style="width: 300px; height: 20px;" required/><br>
-        <span style="font-size:20px; padding-right:17px;">요청사항</span><input type="text" name="req" class="deli_req" id="id_req" style="width: 300px; height: 20px;" placeholder="ex) 배송 전 연락부탁드립니다."><br><br>
+ 	<table class="cart_tb" border="0" align="right" style="margin-top:10px; width: 50%;"><!-- 값 가져오기 -->
+	 <tr><td><div id="container" class="deliInfoArea">
+      	  <div class="deli_info" align="center">
+          <h5 class="deli_title">배송 정보 입력</h5>
+          <span style="font-size:20px; padding-right:50px;">이름</span><input type="text" name="name" class="deli_name" id="id_name" style="width: 300px; height: 20px;" required/><br>
+          <span style="font-size:20px; padding-right:32px;">이메일</span><input type="email" name="email" class="deli_email" id="id_email" placeholder="example@matkit.com" style="width: 300px; height: 20px;" required/><br>
+          <span style="font-size:20px; padding-right:17px;">전화번호</span><input type="text" name="phone" class="deli_phone" id="id_phone" placeholder="'-' 제외한 숫자만 입력" style="width: 300px; height: 20px;"required/><br>
+          <span style="font-size:20px; padding-right:17px;">배송주소</span><input type="text" name="address" class="deli_address" id="id_address" style="width: 300px; height: 20px;" required/><br>
+          <span style="font-size:20px; padding-right:17px;">요청사항</span><input type="text" name="req" class="deli_req" id="id_req" style="width: 300px; height: 20px;" placeholder="ex) 배송 전 연락부탁드립니다."><br><br>
        
 		<p>
-		<span style="font-size:22px; font-weight:800;">총 주문금액 : ${all_total} 원</span><input type="hidden" value="${all_total}" name="totalPrice"><%-- <input type="hidden" value="${param.p_name}" name="p_name"> --%>
+	   <span style="font-size:22px; font-weight:800;">총 주문금액 : ${all_total} 원</span><input type="hidden" value="${all_total}" name="totalPrice"><%-- <input type="hidden" value="${param.p_name}" name="p_name"> --%>
 		</p><br>
 		
 		<input type="submit" style="height:35px; width:145px; font-size:14px;" class="btn_order" value="결제하기"> 
