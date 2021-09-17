@@ -119,15 +119,15 @@
 				<script>
 				function count(type)  {
 					  // 결과를 표시할 element
-					  var resultElement1 = document.getElementById('result');
-					  var resultElement2 = document.getElementById('price');
-					  var resultElement3 = document.getElementById('totalPrice');
+					  let resultElement1 = document.getElementById('result');
+					  let resultElement2 = document.getElementById('price');
+					  let resultElement3 = document.getElementById('totalPrice');
 					  
 					  
 					  // 현재 화면에 표시된 값
-					  var number1 = resultElement1.innerText;
-					  var number2 = resultElement2.innerText;
-					  var number3 = resultElement3.innerText;
+					  let number1 = resultElement1.innerText;
+					  let number2 = resultElement2.innerText;
+					  let number3 = resultElement3.innerText;
 					  
 					  // 더하기/빼기
 					  if(type === 'plus') {
@@ -156,11 +156,12 @@
 						  timer: 3000
 						}).then((result) => {
 					
-					var p_image1 = document.getElementById('pho_detail');
-					var p_image = p_image1.getAttribute("src").substring(1);
-					var p_name=  document.getElementById('item_name').innerText;
-					var price = document.getElementById('howmuch').innerText.split("원",1);
-					var cnt = document.getElementById('result').innerText;
+					let p_image1 = document.getElementById('pho_detail');
+					let p_image = p_image1.getAttribute("src").substring(1);
+					let p_name=  document.getElementById('item_name').innerText;
+					let price = document.getElementById('howmuch').innerText.split("원",1);
+					let cnt = document.getElementById('result').innerText;
+					
 					location.href="../cartProcess.jsp?p_image=" + p_image + "&p_name=" + p_name + "&price=" + price + "&cnt=" + cnt;
 					//location.href="cart_in.do?p_image=" + p_image + "&p_name=" + 안녕 + "&price=" + 200;
 					

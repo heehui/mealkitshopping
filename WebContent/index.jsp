@@ -48,11 +48,9 @@
 
 
   <!--VISUAL-->
-  <section class="visual">
-    <div class="inner">
-
-       <div class="visual__pic"><img src="./images/visual003.jpg"/> </div>
-
+  <section class="visual" >
+    <div class="inner" >
+       <div class="visual__pic" style="z-index: -1;"><img src="./images/visual003.jpg"/></div>
     </div>
   </section>
 
