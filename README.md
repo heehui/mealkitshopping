@@ -1,4 +1,4 @@
-# Front Controller, Oracle을 이용한 밀키트 쇼핑몰 웹사이트 'Matkit'
+# JSP, Servlet, Oracle을 이용한 밀키트 쇼핑몰 사이트 'Matkit'
 #### - 제가 맡은 장바구니 기능, Servlet 위주로 작성했습니다. 
 ##### - 초기시작 URL은 http://localhost:8083/Matkit_Pj/index.jsp 입니다.
 ---
@@ -95,9 +95,11 @@ CREATE TABLE SHOPCART1(
 #
 
 ### 4.2 환경설정
-#### 4.2.1 BasketDBConn.java
 - DB 연동
 ###### - 오라클 데이터베이스가 연동될 수 있도록 한다.
+
+#### 4.2.1 BasketDBConn.java
+###### - DAO에 작성한 각각의 쿼리들이 실행될 때마다 DB 연동이 될 수 있도록 하나의 클래스로 DB연결 부분을 작성해둔다.
 ```
 public class BasketDBConn {
 	private Connection con;
@@ -113,8 +115,41 @@ public class BasketDBConn {
 	}
 }
 ```
+#### 4.2.2 BasketDAO.java
+###### - BasketDBConn.java에서 만든 Connection을 이용하여 쿼리를 실행할 때마다 DB가 연동될 수 있도록 해준다.
 
+```
+public class BasketDAO {
+	private Connection con;
+	PreparedStatement pstmt = null;
+	ResultSet rs = null;
+
+	public BasketDAO() throws ClassNotFoundException, SQLException {
+		con = new BasketDBConn().getConnection();
+	}
+
+	public void pstmtClose() throws SQLException {
+		if(pstmt != null) {
+			pstmt.close();
+		}
+	}
+
+	public void getAllInfoClose() throws SQLException {
+		if(rs != null) {
+			rs.close();
+		}
+		if(pstmt != null) {
+			pstmt.close();
+		}
+		if(con != null) {
+			con.close();
+		}
+	}
+	
+	...
+```
 - Servlet Controller 설정
+#### 4.2.3 shopCartServlet.java
 ###### - Servlet이 Controller 역할을 하여 처리할 수 있도록 한다.
 ###### - annotation @WebServlet을 통해 .do로 끝나는 모든 URL을 해당 컨트롤러로 불러와 서블릿에서 처리될 수 있도록 매핑해준다.
 ```
@@ -195,9 +230,6 @@ public class BasketVO implements Serializable{
 - click()에 의해 장바구니 화면으로 바로 이동할 수 있게 한다.
 - 위와 같은 방식으로 원하는 제품을 장바구니에 계속 담을 수 있다.
 
-![MatKiT2](https://user-images.githubusercontent.com/78891624/133044245-c7577786-397e-49dd-b03e-bab2fcfae727.gif)
-![MatKiT3](https://user-images.githubusercontent.com/78891624/133044325-f876b8e2-7e2c-4353-92c6-fcaf815dee02.gif)
-![MatKiT1_1](https://user-images.githubusercontent.com/78891624/133044375-18c8a5eb-8104-4179-b8e2-4aba1eb53ce3.gif)
 
 |장바구니로 이동|
 |:-:|
@@ -265,11 +297,45 @@ $(document).ready(function() {
   </div> 
 
 ```
+#### 3)shopCartServlet.java
+- header 부분에서 [장바구니]를 누르면, cartView.do로 이동하여 해당 Servlet Controller로 이동하게 된다.
+```
+<li><a href="cartView.do">장바구니</a></li>
+```
+- 임시 아이디 user1을 받은 후, 장바구니 DB에 user1이라는 아이디로 저장된 모든 상품정보를 조회한다.
+- 그 상품정보들을 cart라는 속성명으로 저장하여 cart_in.jsp로 보낸다.
 
+```
+case "/cartView.do":
+			
+	String user_id1 = "user1";
+	BasketDAO bdao1 = null;
+			
+	try {
+		bdao1 = new BasketDAO();
+	} catch (ClassNotFoundException | SQLException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+			
+	ArrayList<BasketVO> alist1 = null;
+	try {
+		alist1 = bdao1.getAllCart(user_id1);
+	} catch (SQLException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+		
+	request.setAttribute("cart", alist1);
+	str = "cart_in.jsp";
+	break;
+```
 #### 3) cart_in.jsp
 - 장바구니 화면
 - @Controller annotation을 이용하여 Controller임을 나타낸다.
 - @Autowired annotation을 이용하여 Service를 객체 형태로 값을 받는다.
+- session에 저장된 값이 없을 때는 <c:when test="${cartlist == null}"> 을 사용하여 '장바구니가 비어있습니다' 가 표시되도록 한다.
+- <c:forEach>의 varStatus을 이용하여 각 테이블 행이 추가할 때마다 고유의 id값을 갖게 한다.
 
 ```
  <div id="container">                    
@@ -301,32 +367,40 @@ $(document).ready(function() {
                	 <span id='result_${status.index}' class="quantity">${cart.cnt}</span>
             	 <input type='button' id='${status.index}' onclick='count("plus",this.id)' value='+'/></td>
 	 	
-  	 	 <c:set var="one_total" value="${cart.price * cart.cnt}"/>
-	 	  <td width=20% name="one_total" class="cart_cont">
-	 	  <span id="totalPrice_${status.index}">${one_total}</span></td>
-		
-		  <td width="10" class="cart_cont"><input type="button" value="수정"  id='${status.index}' onclick="oneUpdate(this.id)" ></td>
-		  <td width="10" class="cart_cont"><input type="button" value="삭제" id='${status.index}' onclick= "deleteRow(this,this.id);"></td>
-		  </tr>
-	       </c:forEach>
-	</c:otherwise>
-        </c:choose>	
-     </table>	
-
-		<c:set var="all_total" value="0"/>
-    		<c:forEach var="result" items="${sessionScope.cartlist}">   
-    		 <c:set var="all_total" value="${all_total + (result.price * result.cnt)}"/> 
- 		</c:forEach> 
-
-	<table class="cart_tb" border="0" align="center">
-	<tr><td align="right" id="title">상품구매금액  <fmt:formatNumber value="${all_total}" pattern="#,###"/> + 무료배송 = 결제 총 금액 : <fmt:formatNumber value="${all_total}" pattern="#,###"/> 원</td><!-- 전체 상품 가격 나오게 --></tr>
-	<tr><td align="right"><input type="button" class="btn_chk_del" style="height:35px; width:145px; font-size:14px;" value="선택상품삭제" >
-		<input type="button" style="height:35px; width:145px; font-size:14px;" value="장바구니 비우기" class="btn_cart_del" onclick="delAllitem()"></td></tr>
-	<tr><td align="center"><input type="button" style="height:35px; width:145px; font-size:14px;" value="결제창이동" class="btn_cart_del" onclick="location.href='payView.jsp'"></td></tr>
-	</table>	
-    </div>            
-  </div> <!-- container 끝 --><!-- 공지사항 end -->
+	...
  
+```
+- 고유한 id값을 준 태그의 값을 불러와 수량변화가 있을 때마다 각 제품에 대한 총 가격도 변동되도록 한다.
+```
+<script>
+	function count(type, idx)  {
+			
+		 var id1 = parseInt(idx);
+			
+		 var resultElement1 = document.getElementById('result_'+id1);
+		 var resultElement2=  document.getElementById('price_'+id1);
+		 var resultElement3 = document.getElementById('totalPrice_'+id1);
+					 
+		// 현재 화면에 표시된 값
+		var number1 = resultElement1.innerText;
+		var number2 = resultElement2.innerText;
+		var number3 = resultElement3.innerText;
+					  
+					 
+		if(type === 'plus') {
+			   number1 = parseInt(number1) + 1;
+			   number3 = parseInt(number3) + parseInt(number2);
+		 }else if(type === 'minus')  {
+			   number1 = parseInt(number1) - 1;
+			   number3 = parseInt(number3) - parseInt(number2);
+		 }
+					  
+		// 결과 출력
+		resultElement1.innerText = number1;
+		resultElement3.innerText = number3;
+					  
+	}
+ </script>
 ```
 #### 4.3.2 장바구니 DB 저장
 #### 1) shopCartServlet.java
@@ -385,6 +459,12 @@ BasketDAO bdao = null;
 ```
 - ArrayList<BasketVO>값 cartlist가 null이 아닐 때, 이미 장바구니에 담긴 제품명이 있을 때
 - ArrayList<BasketVO>값의 제품명(getP_name())을 현재 담은 제품명과 비교하여 같은 경우(이미 담긴 경우), cart_in.jsp에서 테이블 행수를 늘리는 것이 아니라 해당 제품명의 수량만 v.setCnt(v.getCnt()+cnt)로 늘려준다.
+
+
+|장바구니 수량 증가|
+|:-:|
+|![장바구니 수량증가](https://user-images.githubusercontent.com/78891624/133044375-18c8a5eb-8104-4179-b8e2-4aba1eb53ce3.gif)|
+
 ```
 }else{
 	boolean find = false;
@@ -403,7 +483,7 @@ BasketDAO bdao = null;
 ```
 - 이전에 없던 제품이라면 해당 BasketVO  객체 값을 cartlist에 add해준다.
 - 그리고 이 컬렉션 객체를 cartlist라는 속성명으로 session에 저장한다.
-- 곧바로 cartView.do(Controller)로 이동하여 새로 바뀐 변수값들을 보낸다.
+- 곧바로 cartView.do(Controller)로 이동하여 새로 바뀐 변수값들을 보내 cart_in.jsp 페이지가 실행되도록 한다.
 				
 ```			
 if(find == false) {
@@ -423,6 +503,11 @@ if(find == false) {
 	break;
 ```
 #### 4.3.3 장바구니 전체 비우기
+
+|장바구니 전체 비우기|
+|:-:|
+|![장바구니 전체 ](https://user-images.githubusercontent.com/78891624/133044245-c7577786-397e-49dd-b03e-bab2fcfae727.gif?h=750&w=1260)|	
+
 #### 1) cart_in.jsp
 - 장바구니 화면에서 [장바구니 비우기]를 누르면 delAllitem()가 실행된다.
 ```
@@ -472,38 +557,19 @@ public boolean deleteAll_cart(String user_id){
 ```
 #### 4.3.4 장바구니에서 결제페이지 이동
 - 장바구니의 [결제창이동]을 눌러 결제페이지로 이동하게 된다.
-- 
+
+|결제페이지로 이동|
+|:-:|
+|![결제페이지로 이동](https://user-images.githubusercontent.com/78891624/133044325-f876b8e2-7e2c-4353-92c6-fcaf815dee02.gif?h=750&w=1260)|	
+
 #### 1)payView.jsp
+- 장바구니 페이지와 동일한 형태로 SessionScope 값을 불러오고
+- 배송정보를 입력할 수 있도록 input 태그를 만들어 두었다.(이름, 이메일, 전화번호, 배송주소, 요청사항)
+- 결제를 원한다면 [결제하기]를 눌러 실제 이니시스 결제창으로 이동하도록 한다.
+- 결제를 취소하고 싶다면 [취소하기]를 눌러 이전 페이지로 돌아가도록 한다.
+- [홈으로 가기]를 누르면 웹사이트의 메인페이지로 이동하게 된다.
 ```
-<div id="container" >                  
-    <div class="cart_wrap">
-    <table class="cart_tb" border="0" align="left" style="margin-top:10px;  width: 45%;"> 
-	<tr><td id="title" colspan="7" align="left">결제상품</td>
-	<tr align="center" id="title" class="menu">
-	  <td width=20% >이미지</td>
-	  <td width=30%>상품명</td>
-	  <td width=20%>가격</td>
-	  <td width=10%>수량</td>
-	  <td width=20%>합계</td>
-		
-	 <c:forEach var="cart" items="${sessionScope.cartlist}" >
-	 	<tr align="center" id='table'>
-		 <td width="20"><img src=${cart.p_image}  width='70'></td>
-	 	 <td width="30" name="p_name" class="cart_cont">${cart.p_name}</td>
-	         <td width="20" name="price" class="cart_cont">${cart.price}</td>
-	 	 <td width="10" class="cart_cont">${cart.cnt}</td>
-	           <c:set var="one_total" value="${cart.price * cart.cnt}"/>
-	 	<td width="20" name="one_total" class="cart_cont">${one_total}</td>
-	           <c:set var="all_total" value="0"/>
-         <c:forEach var="result" items="${sessionScope.cartlist}">   
-    	   <c:set var="all_total" value="${all_total + (result.price * result.cnt)}"/> 
- 	 </c:forEach> 
-	</c:forEach>
-	  <tr><td align="right" id="title" colspan="7">
-	  상품구매금액<fmt:formatNumber value="${all_total}" pattern="#,###"/> + 무료배송 = 결제 총 금액 : <fmt:formatNumber value="${all_total}" pattern="#,###"/> 원</td></tr>
-	</table>
-  		
-	<form name="p1" action="pay.jsp" method="post">
+<form name="p1" action="pay.jsp" method="post">
  		<table class="cart_tb" border="0" align="right" style="margin-top:10px; width: 50%;"><!-- 값 가져오기 -->
 		<tr><td><div id="container" class="deliInfoArea">
       	<div class="deli_info" align="center">
@@ -525,6 +591,5 @@ public boolean deleteAll_cart(String user_id){
 	
 	</table>
 	</form>
-    </div> 
-  </div> <!-- container 끝 --><!-- 공지사항 end -->
+    </div> 		
 ```
